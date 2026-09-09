@@ -76,8 +76,14 @@ Panel {
   }
 
   function setCenterHoverRevealSuppressed(value) {
-    if (root.bar && "centerHoverRevealSuppressed" in root.bar)
-      root.bar.centerHoverRevealSuppressed = value
+    // root.bar is the PluginBarApi facade (Ui/PluginBarApi.qml), which
+    // exposes centerHoverRevealSuppressed as read-only and requires going
+    // through this setter. A direct property assignment throws
+    // "Cannot assign to read-only property", which — when called as the
+    // first statement in close() — aborted close() before it ever reached
+    // root.controller.hide(), leaving the panel permanently stuck open.
+    if (root.bar && typeof root.bar.setCenterHoverRevealSuppressed === "function")
+      root.bar.setCenterHoverRevealSuppressed(value)
   }
 
   onOpenedChanged: {
